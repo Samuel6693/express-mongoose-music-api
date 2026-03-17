@@ -1,62 +1,36 @@
-import { readFile } from "fs/promises";
-import { connectDb, disconnectDb } from "./db/connection.js";
-import { Artist } from "./models/Artist.js";
-import { getAllArtists, createArtist } from "./db/artists.js";
+import express from "express";
+import { connectDb } from "./db/connection.js";
+import artistRouter from "./routes/artist.js";
+import songsRouter from "./routes/songs.js";
 
-const DATA_PATH = new URL("./data/artists.json", import.meta.url);
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Seed database if empty
-async function seedIfEmpty() {
-  const count = await Artist.countDocuments();
+app.use(express.json());
 
-  if (count > 0) {
-    console.log("Database already has artists, skipping seeding.");
-    return;
-  }
+app.get("/", (req, res) => {
+  res.json({ message: "Music API is running" });
+});
 
-  // Read artists from file and insert into database
-  const raw = await readFile(DATA_PATH, "utf8");
-  const artistsFromFile = JSON.parse(raw);
+app.use("/api/artists", artistRouter);
+app.use("/api/songs", songsRouter);
 
-  // Map the artists to the format expected by the database
-  const artistsToInsert = artistsFromFile.map(a => ({
-    name: a.name
-  }));
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: "Internal server error" });
+});
 
-  // Insert artists into database
-  await Artist.insertMany(artistsToInsert);
-
-  console.log("Seeding completed.");
-}
-
-// Main function to run the application
-async function main() {
-  let isConnected = false;
-
+async function startServer() {
   try {
     await connectDb();
-    isConnected = true;
 
-    await seedIfEmpty();
-
-    const all = await getAllArtists();
-    console.log("All artists:", all.map(a => a.name));
-
-    const existingArtist = await Artist.findOne({ name: "Test Artist" });
-
-    if (existingArtist) {
-      console.log("Test Artist already exists, skipping creation.");
-    } else {
-      const newArtist = await createArtist("Test Artist");
-      console.log("Created artist:", newArtist.name);
-    }
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
   } catch (error) {
-    console.error("An error occurred:", error.message);
-  } finally {
-    if (isConnected) {
-      await disconnectDb();
-    }
+    console.error("Failed to start server:", error.message);
+    process.exit(1);
   }
 }
 
-main();
+startServer();

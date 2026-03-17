@@ -1,14 +1,14 @@
-# Mongoose Example
+# Music API
 
-This is a small Node.js project that uses `mongoose` to connect to MongoDB, seed artist data from a JSON file, and perform a few basic database operations.
+This project is a small Node.js and Express API that uses Mongoose to connect to MongoDB and manage artists and songs.
 
 ## Features
 
 - Connects to MongoDB with Mongoose
 - Loads environment variables with `dotenv`
-- Seeds artists from `data/artists.json` if the database is empty
-- Reads all artists from the database
-- Creates a new artist entry
+- Starts an Express server
+- Exposes REST endpoints for artists and songs
+- Supports song filtering and pagination
 
 ## Project Structure
 
@@ -16,11 +16,17 @@ This is a small Node.js project that uses `mongoose` to connect to MongoDB, seed
 .
 |- data/
 |  |- artists.json
+|  |- songs.json
 |- db/
 |  |- artists.js
 |  |- connection.js
+|  |- songs.js
 |- models/
 |  |- Artist.js
+|  |- Songs.js
+|- routes/
+|  |- artist.js
+|  |- songs.js
 |- index.js
 |- package.json
 ```
@@ -28,7 +34,7 @@ This is a small Node.js project that uses `mongoose` to connect to MongoDB, seed
 ## Requirements
 
 - Node.js
-- MongoDB connection string
+- MongoDB
 
 ## Installation
 
@@ -43,33 +49,71 @@ npm install
 Create a `.env` file in the project root:
 
 ```env
-MONGODB_URI=your_mongodb_connection_string
+MONGODB_URI=mongodb://localhost:27017/MUSICAPP
+PORT=3000
 ```
+
+`PORT` is optional. If it is not set, the app uses `3000`.
 
 ## Run the Project
 
-Start the app with:
+Start in development mode:
 
 ```bash
-node index.js
+npm run dev
 ```
 
-## What the App Does
+Or start normally:
 
-When you run the project, it:
+```bash
+npm start
+```
 
-1. Connects to MongoDB
-2. Checks whether the artists collection already has data
-3. Seeds data from `data/artists.json` if the collection is empty
-4. Fetches and logs all artists
-5. Creates a new artist called `Test Artist`
-6. Disconnects from MongoDB
+When the server is running, the API is available at:
 
-## Dependencies
+```text
+http://localhost:3000
+```
 
-- `mongoose`
-- `dotenv`
+## API Endpoints
+
+### Root
+
+- `GET /`
+
+Returns a simple status message.
+
+### Artists
+
+- `GET /api/artists`
+- `GET /api/artists/:id`
+- `POST /api/artists`
+- `PUT /api/artists/:id`
+- `DELETE /api/artists/:id`
+
+You can filter artists by name with:
+
+```text
+GET /api/artists?q=taylor
+```
+
+### Songs
+
+- `GET /api/songs`
+- `GET /api/songs/:id`
+- `POST /api/songs`
+- `PUT /api/songs/:id`
+- `DELETE /api/songs/:id`
+
+You can filter and paginate songs with query parameters:
+
+```text
+GET /api/songs?q=halo
+GET /api/songs?artist=Bad%20Bunny
+GET /api/songs?page=1&pageSize=10
+```
 
 ## Notes
 
-This project uses ES modules, so `"type": "module"` is set in `package.json`.
+- The project uses ES modules, so `"type": "module"` is set in `package.json`.
+- The `.env` file is gitignored and should not be committed.

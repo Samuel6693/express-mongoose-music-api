@@ -42,7 +42,7 @@ artistRouter.post('/', async (req, res) => {
     if (!name) {
         return res.status(400).json({error: 'Name is required'});
     }  
-    const newArtist = await createArtist({name});
+    const newArtist = await createArtist(name);
     return res.status(201).json(newArtist);
 });
 
@@ -54,7 +54,7 @@ artistRouter.put('/:id', async (req, res) => {
     if (!name) {
         return res.status(400).json({error: 'Name is required'});
     }   
-    const updatedArtist = await updateArtist(id, {name});
+    const updatedArtist = await updateArtist(id, name);
 
     if (!updatedArtist) {
         return res.status(404).json({error: 'Artist not found'});

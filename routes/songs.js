@@ -44,7 +44,7 @@ songsRouter.get('/', async (req, res) => {
         return res.status(400).json({error: "Pagesize must be an integer between 1 and 100"});
     }
 
-    if (pageNum > totalPages) {
+    if (pageNum > totalPages && pageNum > 1) {
         return res.status(400).json({error: "Page number is out of bounds"});
     }
 

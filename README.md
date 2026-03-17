@@ -105,6 +105,17 @@ GET /api/artists?q=taylor
 - `PUT /api/songs/:id`
 - `DELETE /api/songs/:id`
 
+`artist` in songs is a MongoDB reference to an existing artist document. That means you need to create an artist first, then use that artist's `_id` when creating or updating a song.
+
+Example:
+
+```json
+{
+  "title": "Halo",
+  "artist": "67d7f1c2a8b4e123456789ab"
+}
+```
+
 You can filter and paginate songs with query parameters:
 
 ```text

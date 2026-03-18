@@ -12,21 +12,21 @@ export async function getSongsById(id) {
 }
 
 // Create new song
-export async function createSong({title, artist}) {
-    const song = new Songs({title, artist});
+export async function createSong({title, artist, album}) {
+    const song = new Songs({title, artist, album});
     await song.save();
     return song;
 }
 
 // Update songs by Id
-export async function updateSongs(id, {title, artist}) {
+export async function updateSongs(id, {title, artist, album}) {
     const song = await Songs.findById(id).populate('artist');
 
     if (!song) {
         return null
     }
 
-    if (title === undefined && artist === undefined) {
+    if (title === undefined && artist === undefined && album === undefined) {
         return song; // No updates provided, return the original song
     }
     if (title !== undefined) {
@@ -34,6 +34,9 @@ export async function updateSongs(id, {title, artist}) {
     }
     if (artist !== undefined) {
         song.artist = artist
+    }
+    if (album !== undefined) {
+        song.album = album
     }
 
     await song.save(); 

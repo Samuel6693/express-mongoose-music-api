@@ -6,6 +6,7 @@ import {
     updateSongs,
     deleteSongs,
 } from '../db/songs.js';
+import { getAlbumById } from '../db/albums.js';
 
 const songsRouter = express.Router();
 
@@ -78,16 +79,18 @@ songsRouter.post('/', async(req, res) => {
     const {title, artist, albumId} = req.body;
 
     if (!title || !artist) {
-        return res.status(400).json({error: 'title and artist are required'})
+        return res.status(400).json({error: 'title and artist are required'});
     }
+
     if (albumId) {
-        const albumExists = await getAlbumbyId(albumId);
+        const albumExists = await getAlbumById(albumId);
         if (!albumExists) {
             return res.status(400).json({error: 'Album not found'});
         }
     }
+
     const newSong = await createSong({title, artist, album: albumId});
-    res.status(201).json(newSong);
+    return res.status(201).json(newSong);
 });
 
 // PUT /api/songs/:id
@@ -95,8 +98,15 @@ songsRouter.put('/:id', async(req, res) => {
     const id = req.params.id;
     const {title, artist, albumId} = req.body;
 
-    if (title === undefined && artist === undefined) {
-        return res.status(400).json({error: 'title or artist are required'});
+    if (title === undefined && artist === undefined && albumId === undefined) {
+        return res.status(400).json({error: 'title, artist or albumId is required'});
+    }
+
+    if (albumId) {
+        const albumExists = await getAlbumById(albumId);
+        if (!albumExists) {
+            return res.status(400).json({error: 'Album not found'});
+        }
     }
 
     const updatedSong = await updateSongs(id, {title, artist, album: albumId});
@@ -105,7 +115,7 @@ songsRouter.put('/:id', async(req, res) => {
         return res.status(404).json({error: 'song not found'});
     }
 
-    res.json(updatedSong)
+    return res.json(updatedSong);
 });
 
 //DELETE /api/songs/:id
@@ -118,7 +128,7 @@ songsRouter.delete('/:id', async(req, res) => {
         return res.status(404).json({ error: 'song not found' });
     }
 
-    return res.json(deletedSong)
+    return res.json(deletedSong);
 });
 
 export default songsRouter;

@@ -17,8 +17,16 @@ const songsSchema = new mongoose.Schema (
             type: mongoose.Schema.Types.ObjectId,
             ref: "Album",
             required: false
-        }
-    }, {timestamps: true}
+        }, 
+    }, {
+        timestamps: true,
+        toJSON: {virtuals: true},
+        toObject: {virtuals: true}
+    }
 )
+// Virtual property to determine if the song is a single (not part of an album)
+songsSchema.virtual('isSingle').get(function() {
+    return !this.album; 
+});
 
 export const Songs = mongoose.model("Song", songsSchema)

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const albumSchema = mongoose.Schema(
+const albumSchema = new mongoose.Schema(
     {
         artist: {
             type: mongoose.Schema.Types.ObjectId,

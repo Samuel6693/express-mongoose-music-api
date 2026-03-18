@@ -23,9 +23,8 @@ export async function createAlbum({artistId, title, releaseDate}) {
     const album = new Album({artist: artistId, title, releaseDate});
     await album.save();
     return album;
-
-    albumSchema.index({artist: 1, title: 1}, {unique: true});
 }
+
 // Delete album
 export async function deleteAlbum(id) {
     const result = await Album.deleteOne({_id: id});

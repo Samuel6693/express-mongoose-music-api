@@ -75,25 +75,31 @@ songsRouter.get('/:id', async (req, res) => {
 
 //POST /api/songs
 songsRouter.post('/', async(req, res) => {
-    const {title, artist} = req.body;
+    const {title, artist, albumId} = req.body;
 
     if (!title || !artist) {
         return res.status(400).json({error: 'title and artist are required'})
     }
-    const newSong = await createSong({title, artist});
+    if (albumId) {
+        const albumExists = await getAlbumbyId(albumId);
+        if (!albumExists) {
+            return res.status(400).json({error: 'Album not found'});
+        }
+    }
+    const newSong = await createSong({title, artist, album: albumId});
     res.status(201).json(newSong);
 });
 
 // PUT /api/songs/:id
 songsRouter.put('/:id', async(req, res) => {
     const id = req.params.id;
-    const {title, artist} = req.body;
+    const {title, artist, albumId} = req.body;
 
     if (title === undefined && artist === undefined) {
         return res.status(400).json({error: 'title or artist are required'});
     }
 
-    const updatedSong = await updateSongs(id, {title, artist});
+    const updatedSong = await updateSongs(id, {title, artist, album: albumId});
 
     if(!updatedSong) {
         return res.status(404).json({error: 'song not found'});

@@ -6,7 +6,7 @@ import {
     createAlbum,
     deleteAlbum
 } from '../db/albums.js';
-import { getAlbumByArtistId } from '../db/albums.js';
+import { getArtistById } from '../db/artists.js';
 
 const albumRouter = express.Router();
 
@@ -43,19 +43,19 @@ albumRouter.post('/', async (req, res) => {
             error: 'artistId, title and releaseDate are required'});
     }
 
-    const artist = await getAlbumByArtistId(artistId);
+    const artist = await getArtistById(artistId);
     if (!artist) {
-        return res.status(404).json({error: 'Artist not found'});
+        return res.status(400).json({error: 'Artist not found'});
     }
 
     try {
         const newAlbum = await createAlbum({artistId, title, releaseDate});
-        res.status(201).json(newAlbum);
+        return res.status(201).json(newAlbum);
     } catch (error) {
         if (error.code === 11000) { // Duplicate key error
             return res.status(409).json({error: 'Album title already exists for the artist'});
         }
-        res.status(500).json({error: 'Failed to create album'});
+        return res.status(500).json({error: 'Failed to create album'});
     }
 });
 //DELETE /api/albums/:id

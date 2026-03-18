@@ -1,0 +1,12 @@
+Portfolio-ready API todo
+
+[ ] Handle invalid Mongo IDs with 400 responses
+[ ] Validate request bodies for artists and songs
+[ ] Return clearer validation messages for missing or too-short fields
+[ ] Check that a referenced artist exists before creating/updating a song
+[ ] Make API responses more consistent
+[ ] Improve error-handling middleware for expected errors
+[ ] Add a seed/import script for data/artists.json and data/songs.json
+[ ] Add tests for create/get routes, invalid IDs, filtering, and pagination
+[ ] Make DELETE responses more consistent and user-friendly
+[ ] Polish README examples and endpoint documentation

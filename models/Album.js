@@ -29,6 +29,20 @@ albumSchema.pre("save", function () {
     }
 });
 
+// When an album is deleted, set the album field to null for all songs that reference it
+albumSchema.post(
+    "deleteOne",
+    {document: false, query: true }, 
+    async function () {
+        const Song = mongoose.model("Song");
+
+        const id = this.getFilter()._id;
+
+        await Song.updateMany(
+            {album: _id},
+            {$set: {album: null}}
+        );
+});
 albumSchema.index({ artist: 1, title:1 }, { unique: true }) ;
 
 export const Album = mongoose.model("Album", albumSchema);

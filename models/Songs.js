@@ -29,4 +29,20 @@ songsSchema.virtual('isSingle').get(function() {
     return !this.album; 
 });
 
+// Make sure albums belong to the same artist
+songsSchema.pre("save", async function () {
+    if (!this.album) return;
+
+    const Album = mongoose.model("Album");
+    const album = await Album.findById(this.album);
+
+    if (!album) {
+        throw new Error("Album does not exist");
+    }
+
+    if (!album.artist.equals(this.artist)) {
+        throw new Error("Song artist must match the album artist");
+    }
+});
+
 export const Songs = mongoose.model("Song", songsSchema)

@@ -45,4 +45,11 @@ songsSchema.pre("save", async function () {
     }
 });
 
+songsSchema.pre("save", function() {
+    if (!this.isNew && this.album && this.isModified("artist")) {
+        throw new Error (
+            "Can not change artist of a song that belongs to an album");
+    }
+});
+
 export const Songs = mongoose.model("Song", songsSchema)

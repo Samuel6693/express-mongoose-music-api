@@ -31,6 +31,9 @@ albumRouter.get('/:id', async (req, res) => {
 albumRouter.get('/artist/:artistId', async (req, res) => {
     const artistId = req.params.artistId;   
     const albums = await getAlbumByArtistId(artistId);
+    if (albums.length === 0) {
+        return res.status(404).json({message: 'No albums found for this artist'});
+    }
     res.json(albums);
 });
 

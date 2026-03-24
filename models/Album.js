@@ -39,7 +39,7 @@ albumSchema.post(
         const id = this.getFilter()._id;
 
         await Song.updateMany(
-            {album: _id},
+            {album: id},
             {$set: {album: null}}
         );
 });

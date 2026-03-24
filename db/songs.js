@@ -1,4 +1,5 @@
 import {Songs} from '../models/Songs.js'
+import '../models/Artist.js';
 
 // Get all songs
 export async function getAllSongs() {
@@ -20,7 +21,7 @@ export async function createSong({title, artist, album}) {
 
 // Update songs by Id
 export async function updateSongs(id, {title, artist, album}) {
-    const song = await Songs.findById(id).populate('artist');
+    const song = await Songs.findById(id);
 
     if (!song) {
         return null
@@ -39,7 +40,8 @@ export async function updateSongs(id, {title, artist, album}) {
         song.album = album
     }
 
-    await song.save(); 
+    await song.save();
+    await song.populate('artist');
     return song;
 }
 

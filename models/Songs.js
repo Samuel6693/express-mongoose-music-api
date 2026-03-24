@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { Album } from './Album.js';
 
 const songsSchema = new mongoose.Schema (
     {
@@ -33,7 +34,6 @@ songsSchema.virtual('isSingle').get(function() {
 songsSchema.pre("save", async function () {
     if (!this.album) return;
 
-    const Album = mongoose.model("Album");
     const album = await Album.findById(this.album);
 
     if (!album) {

@@ -7,6 +7,7 @@ import {
     deleteSongs,
 } from '../db/songs.js';
 import { getAlbumById } from '../db/albums.js';
+import { getArtistById } from '../db/artists.js';
 
 const songsRouter = express.Router();
 
@@ -65,7 +66,9 @@ songsRouter.get('/', async (req, res) => {
 //GET /api/songs/:id
 songsRouter.get('/:id', async (req, res) => {
     const id = req.params.id;
-
+    if (id.length !== 24) {
+        return res.status(400).json({error: 'Invalid song ID'});
+    }
     const song = await getSongsById(id);
 
     if (!song) {
@@ -80,6 +83,11 @@ songsRouter.post('/', async(req, res) => {
 
     if (!title || !artist) {
         return res.status(400).json({error: 'title and artist are required'});
+    }
+
+    const artistExists = await getArtistById(artist);
+    if (!artistExists) {
+        return res.status(400).json({error: 'Artist not found'});
     }
 
     if (albumId) {
@@ -100,6 +108,13 @@ songsRouter.put('/:id', async(req, res) => {
 
     if (title === undefined && artist === undefined && albumId === undefined) {
         return res.status(400).json({error: 'title, artist or albumId is required'});
+    }
+
+    if (artist !== undefined) {
+        const artistExists = await getArtistById(artist);
+        if (!artistExists) {
+            return res.status(400).json({error: 'Artist not found'});
+        }
     }
 
     if (albumId) {

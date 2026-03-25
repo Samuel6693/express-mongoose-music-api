@@ -1,16 +1,28 @@
 # Music API
 
-This project is a small Node.js and Express API that uses Mongoose to connect to MongoDB and manage artists, albums and songs.
+A small Node.js and Express API that uses Mongoose and MongoDB to manage artists, albums, and songs.
 
 ## Features
 
 - Connects to MongoDB with Mongoose
 - Loads environment variables with `dotenv`
-- Starts an Express server
-- Exposes REST endpoints for artists, albums and songs
-- Supports song filtering and pagination
-- Supports optional album connections on songs
-- Includes a seed script for artists, albums and songs
+- Starts an Express server with JSON support
+- CRUD endpoints for artists
+- CRUD endpoints for songs
+- Create, list, and delete albums
+- Song filtering by title and artist
+- Song pagination with `page` and `pageSize`
+- Seed script for loading sample data
+
+## Current Status
+
+The app that starts from `index.js` currently mounts these route groups:
+
+- `/api/artists`
+- `/api/songs`
+- `/api/albums`
+
+There are also files for auth and playlists in the repository, but they are not wired into `index.js` yet, so they are not part of the running API right now.
 
 ## Project Structure
 
@@ -24,14 +36,20 @@ This project is a small Node.js and Express API that uses Mongoose to connect to
 |  |- albums.js
 |  |- artists.js
 |  |- connection.js
+|  |- playlists.js
 |  |- songs.js
 |- models/
-|  |- Artist.js
 |  |- Album.js
+|  |- Artist.js
+|  |- Playlist.js
 |  |- Songs.js
+|  |- User.js
 |- routes/
 |  |- album.js
 |  |- artist.js
+|  |- auth.js
+|  |- me.js
+|  |- playlist.js
 |  |- songs.js
 |- scripts/
 |  |- seed.js
@@ -45,8 +63,6 @@ This project is a small Node.js and Express API that uses Mongoose to connect to
 - MongoDB
 
 ## Installation
-
-Install dependencies:
 
 ```bash
 npm install
@@ -65,13 +81,13 @@ PORT=3000
 
 ## Run the Project
 
-Start in development mode:
+Development mode:
 
 ```bash
 npm run dev
 ```
 
-Or start normally:
+Start normally:
 
 ```bash
 npm start
@@ -95,7 +111,11 @@ http://localhost:3000
 
 - `GET /`
 
-Returns a simple status message.
+Returns:
+
+```json
+{ "message": "Music API is running" }
+```
 
 ### Artists
 
@@ -105,7 +125,7 @@ Returns a simple status message.
 - `PUT /api/artists/:id`
 - `DELETE /api/artists/:id`
 
-You can filter artists by name with:
+Filter artists by name:
 
 ```text
 GET /api/artists?q=taylor
@@ -119,23 +139,20 @@ GET /api/artists?q=taylor
 - `PUT /api/songs/:id`
 - `DELETE /api/songs/:id`
 
-### Albums
+Filter and paginate songs:
 
-- `GET /api/albums`
-- `GET /api/albums/:id`
-- `GET /api/albums/artist/:artistId`
-- `POST /api/albums`
-- `DELETE /api/albums/:id`
+```text
+GET /api/songs?q=halo
+GET /api/songs?artist=Bad%20Bunny
+GET /api/songs?page=1&pageSize=10
+```
 
-When creating an album:
+When creating or updating a song:
 
-- `artistId`, `title` and `releaseDate` are required
-- the artist must already exist
-- the same artist cannot have two albums with the same title
-
-### Songs
-
-`artist` in songs is a MongoDB reference to an existing artist document. `album` is also a MongoDB reference, but it is optional.
+- `title` and `artist` are required when creating
+- `artist` must reference an existing artist
+- `albumId` is optional
+- if `albumId` is sent, it must reference an existing album
 
 Example:
 
@@ -147,26 +164,31 @@ Example:
 }
 ```
 
-Songs without an album are treated as singles through the virtual boolean `isSingle`.
+### Albums
 
-You can filter and paginate songs with query parameters:
+- `GET /api/albums`
+- `GET /api/albums/:id`
+- `GET /api/albums/artist/:artistId`
+- `POST /api/albums`
+- `DELETE /api/albums/:id`
 
-```text
-GET /api/songs?q=halo
-GET /api/songs?artist=Bad%20Bunny
-GET /api/songs?page=1&pageSize=10
-```
+When creating an album:
+
+- `artistId`, `title`, and `releaseDate` are required
+- the artist must already exist
+- duplicate album titles for the same artist are rejected
 
 ## Seed Data
 
-The project includes seed data in the `data/` folder and a seed script in `scripts/seed.js`.
+The project includes seed data in `data/` and a seed script in `scripts/seed.js`.
 
 - artists are seeded if the artists collection is empty
 - albums are seeded if the albums collection is empty
 - songs are seeded if the songs collection is empty
-- some songs are connected to albums and some are seeded without albums
+- some songs are linked to albums and some are stored without albums
 
 ## Notes
 
-- The project uses ES modules, so `"type": "module"` is set in `package.json`.
-- The `.env` file is gitignored and should not be committed.
+- The project uses ES modules with `"type": "module"` in `package.json`.
+- `.env` is gitignored and should not be committed.
+- Error handling includes invalid MongoDB id handling through a global Express error middleware.

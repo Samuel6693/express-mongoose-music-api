@@ -3,6 +3,8 @@ import { connectDb } from "./db/connection.js";
 import artistRouter from "./routes/artist.js";
 import songsRouter from "./routes/songs.js";
 import albumRouter from "./routes/album.js";
+import authRouter from "./routes/auth.js";
+import meRouter from "./routes/me.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +18,8 @@ app.get("/", (req, res) => {
 app.use("/api/artists", artistRouter);
 app.use("/api/songs", songsRouter);
 app.use("/api/albums", albumRouter);
+app.use("/api/auth", authRouter);
+app.use("/api", meRouter);
 
 app.use((err, req, res, next) => {
   console.error(err);

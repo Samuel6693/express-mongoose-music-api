@@ -1,6 +1,6 @@
 import express from "express";
 import User from "../models/User.js";
-import { generateAccessToken } from "../utils/token.js";
+import { verifyRefreshToken, generateAccessToken } from "../utils/token.js";
 
 const userRouter = express.Router();
 
@@ -60,6 +60,7 @@ userRouter.post("/login", async (req, res) => {
         }
 
         const accessToken = generateAccessToken(existingUser._id);
+        const refreshToken = generateRefreshToken(existingUser._id);
 
         res.status(200).json({
             message: "Login successful",
@@ -67,11 +68,33 @@ userRouter.post("/login", async (req, res) => {
                 id: existingUser._id,
                 username: existingUser.username
             },
-            accessToken
+            accessToken,
+            refreshToken
         });
     } catch {
         res.status(500).json({ message: "Server error" });
     }
+});
+
+userRouter.post("/refresh", async (req, res) => {
+    router.post("/refresh", async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        const payload = verifyRefreshToken(refreshToken);
+
+        const accessToken = generateAccessToken(payload.userId);
+
+        return res.json({ accessToken });
+
+    } catch {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+    });
 });
 
 export default userRouter;

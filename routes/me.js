@@ -4,7 +4,7 @@ import User from "../models/User.js";
 
 const meRouter = express.Router();
 
-meRouter.get("/me", async (req, res) => {
+async function getCurrentUser(req, res) {
     const header = req.headers.authorization;
 
     if (!header) {
@@ -42,6 +42,9 @@ meRouter.get("/me", async (req, res) => {
             message: "Unauthorized"
         });
     }
-});
+}
+
+meRouter.get("/me", getCurrentUser);
+meRouter.get("/profile", getCurrentUser);
 
 export default meRouter;

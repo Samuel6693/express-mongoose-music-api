@@ -5,6 +5,7 @@ import songsRouter from "./routes/songs.js";
 import albumRouter from "./routes/album.js";
 import authRouter from "./routes/auth.js";
 import meRouter from "./routes/me.js";
+import playlistRouter from "./routes/playlist.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
 app.use("/api/artists", artistRouter);
 app.use("/api/songs", songsRouter);
 app.use("/api/albums", albumRouter);
+app.use("/api/playlists", playlistRouter);
 app.use("/api/auth", authRouter);
 app.use("/api", meRouter);
 

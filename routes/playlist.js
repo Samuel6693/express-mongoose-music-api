@@ -6,7 +6,7 @@ import {
   addSongToPlaylist,
   removeSongFromPlaylist
 } from "../db/playlists.js";
-import { Song } from "../models/Song.js";
+import { Songs } from "../models/Songs.js";
 
 const playlistRouter = Router();
 
@@ -31,7 +31,7 @@ playlistRouter.post("/", async (req, res) => {
 playlistRouter.post("/:id/songs", async (req, res) => {
   const { songId } = req.body;
 
-  const songExists = await Song.findById(songId);
+  const songExists = await Songs.findById(songId);
   if (!songExists) {
     return res.status(400).json({ message: "Song not found" });
   }

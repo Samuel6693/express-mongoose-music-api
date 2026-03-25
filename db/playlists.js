@@ -21,26 +21,40 @@ export async function createPlaylist( name, description ) {
 export async function addSongToPlaylist(playlistId, songId) {
     const playlist = await Playlist.findById(playlistId);
     if (!playlist) {
-        return null;
+        return { error: "playlist_not_found" };
     }
-    if (playlist.songs.includes(songId)) {
-        return null;
+
+    const alreadyExists = playlist.songs.some(
+        id => id.toString() === songId
+    );
+
+    if (alreadyExists) {
+        return { error: "song_already_in_playlist" };
     }
+
     playlist.songs.push(songId);
     await playlist.save();
-    return playlist;
+    await playlist.populate("songs");
+    return { playlist };
 }
 
 // Remove song from playlist
 export async function removeSongFromPlaylist(playlistId, songId) {
     const playlist = await Playlist.findById(playlistId);
     if (!playlist) {
-        return null;
+        return { error: "playlist_not_found" };
     }
+
+    const originalLength = playlist.songs.length;
     playlist.songs = playlist.songs.filter(
         id => id.toString() !== songId
     );
-    
+
+    if (playlist.songs.length === originalLength) {
+        return { error: "song_not_in_playlist" };
+    }
+
     await playlist.save();
-    return playlist;
+    await playlist.populate("songs");
+    return { playlist };
 }

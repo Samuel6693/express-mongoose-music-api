@@ -28,7 +28,7 @@ const userScehma = new mongoose.Schema(
 );
 
 // Add method to comapre passwords
-userScehma.methods.comparepassword = async function (plainpassword) {
+userScehma.methods.comparePassword = async function (plainpassword) {
     return await bcrypt.compare(plainpassword, this.password);
 }
 
@@ -42,5 +42,4 @@ userScehma.pre("save", async function (next) {
     next();
 });
 
-
-export default User = mongoose.model("User", userScehma);
+export default mongoose.model("User", userScehma);

@@ -1,12 +1,14 @@
 import { Router } from "express";
 import {
   getAllPlaylists,
+  getAllPlaylistsByUserId,
   getPlaylistById,
   createPlaylist,
   addSongToPlaylist,
   removeSongFromPlaylist
 } from "../db/playlists.js";
 import { Songs } from "../models/Songs.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const playlistRouter = Router();
 
@@ -14,24 +16,35 @@ playlistRouter.get("/", async (req, res) => {
   res.json(await getAllPlaylists());
 });
 
-playlistRouter.get("/:id", async (req, res) => {
+// GET /api/playlists/my
+playlistRouter.get("/my", requireAuth, async (req, res) => {
+
+  res.json(await getAllPlaylistsByUserId(req.userId));
+});
+
+// GET /api/playlists/:id
+playlistRouter.get("/:id", requireAuth, async (req, res) => {
+
   const playlist = await getPlaylistById(req.params.id);
+
   if (!playlist) return res.status(404).json({ message: "Not found" });
+
   res.json(playlist);
 });
 
-playlistRouter.post("/", async (req, res) => {
+// POST /api/playlists
+playlistRouter.post("/", requireAuth, async (req, res) => {
   const { name, description } = req.body;
 
   if (!name || !name.trim()) {
     return res.status(400).json({ message: "Name is required" });
   }
 
-  const created = await createPlaylist(name.trim(), description);
+  const created = await createPlaylist(name.trim(), description, req.userId);
   res.status(201).json(created);
 });
 
-playlistRouter.post("/:id/songs", async (req, res) => {
+playlistRouter.post("/:id/songs", requireAuth, async (req, res) => {
   const { songId } = req.body;
 
   if (!songId) {
@@ -54,7 +67,33 @@ playlistRouter.post("/:id/songs", async (req, res) => {
   res.json(result.playlist);
 });
 
-playlistRouter.delete("/:id/songs/:songId", async (req, res) => {
+// PUT /api/playlsits/:id
+playlistRouter.put("/:id", requireAuth, async (req, res) => {
+  const { name, description } = req.body;
+  const playlist = await getPlaylistById(req.params.id);
+
+  if (!playlist) {
+    return res.status(404).json({ message: "Playlist not found" });
+  }
+
+  if (playlist.owner === null || playlist.owner.toString() !== req.userId) {
+    return res.status(403).json({ message: "You are not the owner of this playlist" });
+  }
+  
+  if (name && name.trim()) {
+    playlist.name = name.trim();
+  }
+  if (description) {
+    playlist.description = description;
+  }
+
+  await playlist.save();
+  res.json(playlist);
+});
+
+
+// DELETE /api/playlists/:id/songs/:songId
+playlistRouter.delete("/:id/songs/:songId", requireAuth, async (req, res) => {
   const result = await removeSongFromPlaylist(
     req.params.id,
     req.params.songId
@@ -68,6 +107,23 @@ playlistRouter.delete("/:id/songs/:songId", async (req, res) => {
   }
 
   res.json(result.playlist);
+});
+
+
+// Delete playlist/:id
+playlistRouter.delete("/:id", requireAuth, async (req, res) => {
+  const playlist = await getPlaylistById(req.params.id);
+
+  if (!playlist) {
+    return res.status(404).json({ message: "Playlist not found" });
+  }
+
+  if (playlist.owner === null || playlist.owner.toString() !== req.userId) {
+    return res.status(403).json({ message: "You are not the owner of this playlist" });
+  }
+
+  await playlist.deleteOne();
+  res.json({ message: "Playlist deleted" });
 });
 
 export default playlistRouter;

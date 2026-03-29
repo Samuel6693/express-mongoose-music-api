@@ -1,7 +1,11 @@
-import { Playlist } from "../models/Playlist.js";
+import Playlist from "../models/Playlist.js";
 
 export async function getAllPlaylists() {
     return await Playlist.find().populate('songs');
+}
+
+export async function getAllPlaylistsByUserId(userId) {
+    return await Playlist.find({ owner: userId }).populate('songs');
 }
 
 export async function getPlaylistById(id) {
@@ -11,8 +15,8 @@ export async function getPlaylistById(id) {
     return await Playlist.findById(id).populate('songs')
 }
 
-export async function createPlaylist( name, description ) {
-    const playlist = new Playlist({name, description, songs: []})
+export async function createPlaylist(name, description, owner = null) {
+    const playlist = new Playlist({ name, description, songs: [], owner })
     await playlist.save();
     return playlist;
 }

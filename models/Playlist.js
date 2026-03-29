@@ -14,8 +14,14 @@ const playlistSchema = new mongoose.Schema (
         songs: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "Song"
-        }]
+        }],
+        owner: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null
+        }
     }, {timestamps: true }
 );
 
-export const Playlist = mongoose.model("Playlist", playlistSchema);
+const Playlist = mongoose.model("Playlist", playlistSchema);
+export default Playlist;

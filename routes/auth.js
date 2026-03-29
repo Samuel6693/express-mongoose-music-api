@@ -34,7 +34,17 @@ userRouter.post("/register", async (req, res) => {
             username: user.username
         });
 
-    } catch {
+    } catch (error) {
+        console.error("Register error:", error);
+
+        if (error.name === "ValidationError") {
+            return res.status(400).json({ message: error.message });
+        }
+
+        if (error.code === 11000) {
+            return res.status(409).json({ message: "User already exists" });
+        }
+
         res.status(500).json({ message: "Server error" });
     }
 });
@@ -71,7 +81,8 @@ userRouter.post("/login", async (req, res) => {
             accessToken,
             refreshToken
         });
-    } catch {
+    } catch (error) {
+        console.error("Login error:", error);
         res.status(500).json({ message: "Server error" });
     }
 });

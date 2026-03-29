@@ -1,4 +1,5 @@
 import { Router } from "express";
+import mongoose from "mongoose";
 import {
   getAllPlaylists,
   getAllPlaylistsByUserId,
@@ -44,11 +45,21 @@ playlistRouter.post("/", requireAuth, async (req, res) => {
   res.status(201).json(created);
 });
 
+// add song to playlist, no duplicate songs allowed
 playlistRouter.post("/:id/songs", requireAuth, async (req, res) => {
   const { songId } = req.body;
+  const playlistId = req.params.id;
+
+  if (!mongoose.isValidObjectId(playlistId)) {
+    return res.status(400).json({ message: "Invalid playlist id" });
+  }
 
   if (!songId) {
     return res.status(400).json({ message: "songId is required" });
+  }
+
+  if (!mongoose.isValidObjectId(songId)) {
+    return res.status(400).json({ message: "Invalid song id" });
   }
 
   const songExists = await Songs.findById(songId);
@@ -56,7 +67,7 @@ playlistRouter.post("/:id/songs", requireAuth, async (req, res) => {
     return res.status(400).json({ message: "Song not found" });
   }
 
-  const result = await addSongToPlaylist(req.params.id, songId);
+  const result = await addSongToPlaylist(playlistId, songId);
   if (result.error === "playlist_not_found") {
     return res.status(404).json({ message: "Playlist not found" });
   }
@@ -94,6 +105,14 @@ playlistRouter.put("/:id", requireAuth, async (req, res) => {
 
 // DELETE /api/playlists/:id/songs/:songId
 playlistRouter.delete("/:id/songs/:songId", requireAuth, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(400).json({ message: "Invalid playlist id" });
+  }
+
+  if (!mongoose.isValidObjectId(req.params.songId)) {
+    return res.status(400).json({ message: "Invalid song id" });
+  }
+
   const result = await removeSongFromPlaylist(
     req.params.id,
     req.params.songId
